@@ -25,6 +25,7 @@
             value: 2005,
             slide: function( event, ui ) {
                 $("#slider-year-amount").val(ui.value); //Triggered On Slide
+                colorAllStatesForYear(+ui.value);
             }
         });
         $("#slider-year-amount").val($("#slider-year").slider("value"));

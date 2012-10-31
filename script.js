@@ -30,17 +30,21 @@ var g = svg.append("g")
   .append("g")
     .attr("id", "states");
 
-var theCallback = function (){
-	alert("A");
-};
+window.yearToColor = 2005;
 
-d3.json("readme.json", function(json) {
+/*var theCallback = function (){
+	alert("A");
+};*/
+
+var circles = svg.append("svg:g")
+    .attr("id", "circles");
+
+d3.json("uspolitical.json", function(json) {
   g.selectAll("path")
       .data(json.features)
       .enter().append("path")
       .attr("d", path)
-	  .attr("secret", function(d, i) { /*alert(d.properties.abbr);*/ return d.properties.abbr;/*"Me!"+i;*/ }) //Prints out state
-	  
+	  .attr("stateabbr", function(d, i) { /*alert(d.properties.abbr);*/ return d.properties.abbr;/*"Me!"+i;*/ }) //Prints out state
       .on("click", click);
 
 
@@ -56,17 +60,9 @@ d3.json("readme.json", function(json) {
 
 });
 
-
-
-var circles = svg.append("svg:g")
-    .attr("id", "circles");
-
 d3.csv("county_unemployment_data_small.csv", function(counties) {
-	var linksByOrigin = {},
-      countByAirport = {},
-      locationByAirport = {},
-	  shouldShow = [],
-      positions = [];
+	var shouldShow = [];
+    var positions = [];
 
 
     counties = counties.filter(function(county) {
@@ -74,7 +70,7 @@ d3.csv("county_unemployment_data_small.csv", function(counties) {
         var location = [+county.longitude, +county.latitude];
         //locationByAirport[airport.iata] = location;
         positions.push(projection(location));
-		shouldShow.push(+county.year);
+		//shouldShow.push(+county.year);
 
 		//projection(location)
 
@@ -91,7 +87,9 @@ d3.csv("county_unemployment_data_small.csv", function(counties) {
         .attr("cx", function(d, i) { return positions[i][0]; })
         .attr("cy", function(d, i) { return positions[i][1]; })
 		.attr("display", function(d,i) { /*if(shouldShow[i] != 1900)*/ return "none"; } )
+		.attr("year", function(d,i) {return +d.year;})
 		.attr("state", function(d, i) { return d.state; }) //Prints out state
+		.attr("rate", function(d,i) { return +d.rate; })
         .attr("r", function(d, i) { return 5; });
         //.sort(function(a, b) { return countByAirport[b.iata] - countByAirport[a.iata]; });
 
@@ -203,9 +201,71 @@ d3.csv("county_unemployment_data_small.csv", function(counties) {
   });
 });*/
 
+function findAvgForStateAndYear(year, state){
+	var runningTotal = 0;
+	var totalAdded = 0;
+	
+	circles.selectAll("circle")
+	.attr("state", function(d) {
+		if (d3.select(this).attr("state") == state && d3.select(this).attr("year") == year){
+			runningTotal += +d3.select(this).attr("rate");
+			totalAdded++;
+		}
+		/*else {
+			alert(d3.select(this).attr("state"));
+			alert(state);
+			alert(d3.select(this).attr("year"));
+			alert(year);
+		}*/
+		return d3.select(this).attr("state");
+	});
+	
+	if(totalAdded == NaN || totalAdded < 1){
+		totalAdded = 1;
+	}
+	//alert(runningTotal+","+totalAdded);
+	//alert(runningTotal/totalAdded);
+	return runningTotal/totalAdded;
+}
 
 
-
+function colorAllStatesForYear(yearToColor) {
+	if (window.yearToColor != yearToColor){
+		window.yearToColor = yearToColor;
+		
+		//g.selectAll("path")
+		//	.classed("active", centered && function(d) { if (d===centered){ window.clickedState = d3.select(this).attr("stateabbr");} return d === centered; });
+		
+		
+		g.selectAll("path")
+		.style("fill", function(d,i) {
+		
+			var stateAvg = findAvgForStateAndYear(yearToColor, d3.select(this).attr("stateabbr"));
+			
+			var color = d3.scale.linear()
+			  .domain([0, 15, 30])
+			  .range(["red", "yellow", "blue"]);
+			
+			//alert(stateAvg);
+			
+			return color(stateAvg);
+			
+			/*if (stateAvg < 20){
+				return "#00F";
+			}
+			else {
+				return "#F00";
+			}*/
+		
+			//d3.select(this).attr("state") && centered)return 1.0; else return 1.0;
+			
+			
+		});
+		
+		
+		
+	}
+}
 
 
 
@@ -229,7 +289,7 @@ function click(d) {
 	}
 
 	g.selectAll("path")
-		.classed("active", centered && function(d) { if (d===centered){ window.clickedState = d3.select(this).attr("secret");} return d === centered; });
+		.classed("active", centered && function(d) { if (d===centered){ window.clickedState = d3.select(this).attr("stateabbr");} return d === centered; });
 
 
 
