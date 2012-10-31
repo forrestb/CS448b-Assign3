@@ -1,0 +1,74 @@
+<!DOCTYPE html PUBLIC"-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<meta charset="utf-8">
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <link rel="stylesheet" type="text/css" href="style.css"/>
+  </head>
+  <body>
+    <!--<script src="d3.v2.js"></script>-->
+    <script src="http://d3js.org/d3.v2.min.js?2.9.6"></script>
+    <script src="script.js"></script>
+    
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.1/themes/base/jquery-ui.css" />
+    <script src="http://code.jquery.com/jquery-1.8.2.js"></script>
+    <script src="http://code.jquery.com/ui/1.9.1/jquery-ui.js"></script>
+    
+    
+
+    
+    <script>
+    $(function() {
+        $("#slider-year").slider({
+            range: "min",
+            min: 1992,
+            max: 2011,
+            value: 2005,
+            slide: function( event, ui ) {
+                $("#slider-year-amount").val(ui.value); //Triggered On Slide
+            }
+        });
+        $("#slider-year-amount").val($("#slider-year").slider("value"));
+    });
+    </script>
+    
+    <p>
+        <label for="slider-year-amount">Year:</label>
+        <input type="text" id="slider-year-amount" style="border: 0; color: #f6931f; font-weight: bold;"/>
+    </p>
+    <div id="slider-year" style="width:500px;"></div>
+    
+    
+    
+    
+    <script>
+    $(function() {
+        $("#slider-range").slider({
+            range:true,
+            min:0,
+            max:40,
+            values: [0,40],
+            slide: function(event, ui) {
+                $("#slider-range-amount").val(ui.values[0] +" - "+ui.values[1]); //Triggered On Slide
+            }
+        });
+        
+        $("#slider-range-amount").val($( "#slider-range").slider("values", 0) +
+                    " - " + $("#slider-range").slider("values", 1));
+    });
+    </script>
+    
+    <p>
+        <label for="slider-range-amount">Unemployment % Range:</label>
+        <input type="text" id="slider-range-amount" style="border: 0; color: #f6931f; font-weight: bold;"/>
+    </p>
+    <div id="slider-range" style="width:500px;"></div>
+    
+    
+
+  </body>
+</html>
+
+
+
+
+<body>

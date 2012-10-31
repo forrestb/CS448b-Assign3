@@ -1,0 +1,15 @@
+.background {
+  fill: none;
+  pointer-events: all;
+}
+
+#states {
+  fill: #0000;
+  stroke: #fff;
+  stroke-width: 1.5px;
+}
+
+#states .active {
+  /*fill: steelblue;*/
+ 	fill:#aaa;
+}
