@@ -3,6 +3,12 @@
   pointer-events: all;
 }
 
+.fullSVG text {
+	font: 24px Arial;
+	font-weight:bold;
+	fill:#333;
+}
+
 #states {
   fill: #0000;
   stroke: #fff;
