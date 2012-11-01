@@ -40,9 +40,9 @@ var stateThenYearAvg = [];
 
 var yearThenCountyThenCoordsAndRate = [];
 
-/*var theCallback = function (){
-	alert("A");
-};*/
+var colorFunction = d3.scale.linear()
+  .domain([0, 10, 20, 30])
+  .range(["blue", "yellow", "orange", "red"]);
 
 var circles = svg.append("svg:g")
     .attr("id", "circles");
@@ -235,12 +235,9 @@ function yearChanged(yearToColor) {
 			.style("fill", function(d,i) {
 				
 				var stateAvg = findAvgForStateAndYear(yearToColor, d3.select(this).attr("stateabbr"));	
-				var color = d3.scale.linear()
-				  .domain([0, 10, 20, 30])
-				  .range(["blue", "yellow", "orange", "red"]);
 			
 				if (stateAvg >= window.rangeMin && stateAvg <= window.rangeMax)
-					return color(stateAvg);
+					return colorFunction(stateAvg);
 				else
 					return "#aaa";
 	
@@ -271,6 +268,7 @@ function yearChanged(yearToColor) {
 					
 		circles.selectAll("circle") //Scale circles according to unemployment
 			.attr("r", function(d, i) { return d3.select(this).attr("years").split(',')[window.yearToColor-1992]; /*return 5;*/ })
+			.attr("fill",function(d, i){ return colorFunction(+d3.select(this).attr("years").split(',')[window.yearToColor-1992]); })
 			.style("display", function(d,i) { if(d3.select(this).attr("years").split(',')[window.yearToColor-1992] >= rangeMin && 
 												d3.select(this).attr("years").split(',')[window.yearToColor-1992] <= rangeMax) return "block"; else return "none";});
 	
@@ -312,19 +310,26 @@ function cacheState(inState){
 		});
 	});*/
 	
+	//$(circles).css("display","none");
+	
+	$("#circles").css("display","block");
+	
+	//d3.select(circles).style("display","block");
+	
+	
 	circles.selectAll("circle")
 	    .data([])
 		.exit()
 		.remove();
 	
-	d3.csv("county_unemployment_data_mod.csv", function(counties) {
+	d3.csv("county_by_state/"+inState+".csv", function(counties) {
 		
 	    var runningCounties = [];
 
 	    counties = counties.filter(function(county) {
 	        //var location = [+county.longitude, +county.latitude];
 	        //positions.push(projection(location));
-			if (county.state == inState){
+			//if (county.state == inState){
 				//alert("G");
 				if (runningCounties[county.county] == undefined){
 					//alert("AA"+county.year);
@@ -333,9 +338,10 @@ function cacheState(inState){
 	        		return true;
 				} else {
 					runningCounties[county.county][+county.year] = +county.rate;
+					return false;
 				}
-			}
-			return false;
+			//}
+			//return false;
 	    });
 
 
@@ -359,12 +365,39 @@ function cacheState(inState){
 			//.attr("display", function(d,i) { return "none"; } )
 			//.attr("year", function(d,i) {return +d.year;})
 			.attr("state", function(d, i) { return d.state; })
+			.attr("county_filename", function(d, i) {return d.county_filename;})
+			.attr("fill",function(d, i){ return colorFunction(+d3.select(this).attr("years").split(',')[window.yearToColor-1992]); })
+			.on("click", countyClick)
+			
+			
+			/*.on("mouseover", function() {
+			        d3.select(this).enter().append("text")
+			            .text(function(d) {return "10";})
+			            .attr("x", function(d) {return x(d.x);})
+			            .attr("y", function (d) {return y(d.y);}); })*/
 			//.attr("rate", function(d,i) { return +d.rate; })
-	        .attr("r", function(d, i) { return d3.select(this).attr("years").split(',')[window.yearToColor-1992]; /*return 5;*/ });
+	        .attr("r", function(d, i) { return +d3.select(this).attr("years").split(',')[window.yearToColor-1992]+2; /*return 5;*/ });
+	
+	
+		 	$('svg circle').tipsy({ 
+		    	gravity: 'w', 
+		        html: true, 
+		        title: function() {
+				  //alert(this);
+				  //window.what=this;
+				  //alert(d3.select(this).attr("name"));
+		          var d = this.__data__, c = "#FF0000";
+		          return d3.select(this).attr("name")+': <span style="color:' + c + '">' + d3.select(this).attr("years").split(',')[window.yearToColor-1992] +'%' +'</span>'; 
+		        }
+		    });
 	});
 	
 }
 
+function countyClick(d){
+	alert(d.county_filename);
+	//tld.add_series(d.county_filename);
+}
 
 
 function click(d) {
@@ -404,9 +437,8 @@ function click(d) {
 		circles.transition()
 			.duration(1000)
 			.attr("transform", "translate(" + x*2 + "," + y*2 + ")")
-			.style("opacity",0.0);
-			
-		/*.each("end", function(){ $(this).css("display","none"); });*/
+			.style("opacity",0.0)
+			.each("end", function(){ $(this).css("display","none"); });
 	}
 	
 	yearChanged(window.yearToColor);
